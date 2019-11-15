@@ -6,7 +6,7 @@ For network creation i use Ubuntu 19.04 with NVidia GPU.
 For iOS compilation i use Catalina and Xcode 11.
 Also we need two virtualenvs in ubuntu - for python2 and python3.
 
-1. Get and compile darknet, i recomend [AlexeyAB fork](https://github.com/AlexeyAB/darknet.git). Enable CUDA and OpenCV support.
+1. Get and compile darknet, i recommend [AlexeyAB fork](https://github.com/AlexeyAB/darknet.git). Enable CUDA and OpenCV support.
 
 2. Prepare image dataset. My network is for detection of SCRATCHES on 224x224 input. Refer to darknet docs if you need your own objects. Split images into scratch/positives and scratch/negatives. Positives must contain images with objects and txt files with boxes. Negatives must contain images without objects and empty txt files. You can use https://github.com/AlexeyAB/Yolo_mark.
 
