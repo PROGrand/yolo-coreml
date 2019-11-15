@@ -1,5 +1,5 @@
 # yolo-coreml
----
+
 ## Quick Start
 I will demonstrate, how to create and use realtime object detection engine using [YOLOv3](http://pjreddie.com/darknet/yolo/) and iOS.
 For network creation i use Ubuntu 19.04 with NVidia GPU.
@@ -32,11 +32,14 @@ python coreml.py scratch
 
 6. See [how to use created mlmodel](https://github.com/Mrlawrance/yolov3-ios/tree/master/ios). Change classes names and count, anchors, network size if you use your owns.
 
----
-
 ## Performance
 SCRATCH network gives about 40 scratch detections per second on iPhone X.
 
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
+## References
+* [YOLOv3](http://pjreddie.com/darknet/yolo)
+* [AlexeyAB](https://github.com/AlexeyAB/darknet.git)
+* [allanzelener](https://github.com/allanzelener/YAD2K)
+* [muyiguangda](https://github.com/muyiguangda/tensorflow-keras-yolov3)
 
 ---
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
