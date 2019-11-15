@@ -30,7 +30,7 @@ pip install tensorflow==1.14.0 keras==2.3.1 coremltools==3.1
 python coreml.py scratch
 ```
 
-6. See [how to use created mlmodel](https://github.com/Mrlawrance/yolov3-ios). Change classes names and count, anchors, network size if you use your owns.
+6. See [how to use created mlmodel](https://github.com/Mrlawrance/yolov3-ios/tree/master/ios). Change classes names and count, anchors, network size if you use your owns.
 
 ---
 
