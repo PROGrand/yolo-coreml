@@ -1,0 +1,42 @@
+# yolo-coreml
+---
+## Quick Start
+I will demonstrate, how to create and use realtime object detection engine using [YOLOv3](http://pjreddie.com/darknet/yolo/) and iOS.
+For network creation i use Ubuntu 19.04 with NVidia GPU.
+For iOS compilation i use Catalina and Xcode 11.
+Also we need two virtualenvs in ubuntu - for python2 and python3.
+
+1. Get and compile darknet, i recomend [AlexeyAB fork](https://github.com/AlexeyAB/darknet.git). Enable CUDA and OpenCV support.
+
+2. Prepare image dataset. My network is for detection of SCRATCHES on 224x224 input. Refer to darknet docs if you need your own objects. Split images into scratch/positives and scratch/negatives. Positives must contain images with objects and txt files with boxes. Negatives must contain images without objects and empty txt files. You can use https://github.com/AlexeyAB/Yolo_mark.
+
+3. Create yolov3 darknet model. You can use my config and scripts from [scratch](scratch) folder for reference. 
+
+4. yolov3 -> keras (requires python2.7):
+
+```
+virtualenv -p /usr/bin/python3 yolo2keras
+source yolo2keras/bin/activate
+pip install tensorflow==1.14.0 keras==2.3.1
+python convert.py scratch.cfg scratch.weights scratch.h5
+```
+
+5. keras -> coreml (requires python3):
+
+```
+virtualenv -p /usr/bin/python2.7 keras2coreml
+source keras2coreml/bin/activate
+pip install tensorflow==1.14.0 keras==2.3.1 coremltools==3.1
+python coreml.py scratch
+```
+
+6. See [how to use created mlmodel](https://github.com/Mrlawrance/yolov3-ios). Change classes names and count, anchors, network size if you use your owns.
+
+---
+
+## Performance
+SCRATCH network gives about 40 scratch detections per second on iPhone X.
+
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
+
+---
