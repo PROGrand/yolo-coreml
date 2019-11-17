@@ -12,7 +12,7 @@ Also we need two virtualenvs in ubuntu - for python2 and python3.
 
 3. Create yolov3 darknet model. You can use my config and scripts from [scratch](scratch) folder for reference. 
 
-4. yolov3 -> keras (requires python2.7):
+4. yolov3 -> keras (requires python3):
 
 ```
 virtualenv -p /usr/bin/python3 yolo2keras
@@ -21,7 +21,7 @@ pip install tensorflow==1.14.0 keras==2.3.1
 python convert.py scratch.cfg scratch.weights scratch.h5
 ```
 
-5. keras -> coreml (requires python3):
+5. keras -> coreml (requires python2.7):
 
 ```
 virtualenv -p /usr/bin/python2.7 keras2coreml
