@@ -12,7 +12,7 @@ Also we need two virtualenvs in ubuntu - for python2 and python3.
 
 3. Create yolov3 darknet model. You can use my config and scripts from [scratch](scratch) folder for reference. 
 
-4 Instal Anaconda
+4. Instal Anaconda
 ```
 wget https://repo.continuum.io/archive/Anaconda3-5.3.1-Linux-x86_64.sh
 bash ./Anaconda3-5.3.1-Linux-x86_64.sh
