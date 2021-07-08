@@ -21,6 +21,16 @@ pip install tensorflow==1.14.0 keras==2.3.1
 python convert.py scratch.cfg scratch.weights scratch.h5
 ```
 
+using anaconda:
+```
+wget https://repo.continuum.io/archive/Anaconda3-5.3.1-Linux-x86_64.sh
+bash ./Anaconda3-5.3.1-Linux-x86_64.sh
+conda create -n yolo2keras python=3.6 anaconda
+conda activate yolo2keras
+conda install tensorflow=1.14.0
+conda install keras=2.3.1
+```
+
 5. keras -> coreml (requires python2.7):
 
 ```
