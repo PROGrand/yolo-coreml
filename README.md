@@ -24,7 +24,7 @@ conda create -n yolo2keras python=3.6 anaconda
 conda activate yolo2keras
 conda install tensorflow=1.14.0
 conda install keras=2.3.1
-conda install coremltools=5.0
+conda install coremltools=4.1
 python convertv4.py yolov4.cfg yolov4.weights yolov4.mlmodel
 ```
 
