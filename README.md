@@ -28,9 +28,9 @@ conda install keras=2.3.1
 
 6. keras -> coreml (requires python2.7):
 ```
-virtualenv -p /usr/bin/python2.7 keras2coreml
-source keras2coreml/bin/activate
-pip install tensorflow==1.14.0 keras==2.3.1 coremltools==3.1
+conda create -n keras2coreml python=2.7 anaconda
+conda activate keras2coreml
+conda install tensorflow=1.14.0 keras=2.3.1 coremltools=3.1
 python coreml.py scratch
 ```
 
