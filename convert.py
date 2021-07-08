@@ -10,6 +10,7 @@ from keras import backend as K
 from keras.layers import (Conv2D, Input, ZeroPadding2D, Add,
                           UpSampling2D, MaxPooling2D, Concatenate)
 from keras.layers.advanced_activations import LeakyReLU
+from mish_keras import Mish
 from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.regularizers import l2
@@ -30,6 +31,11 @@ parser.add_argument(
     '--weights_only',
     help='Save as Keras weights file instead of model file.',
     action='store_true')
+
+
+## Mish Activation Function
+def mish(x):
+    return tf.keras.layers.Lambda(lambda x: x*tf.tanh(tf.log(1+tf.exp(x))))(x)
 
 def unique_config_sections(config_file):
     """Convert all config sections to have unique names.
@@ -153,6 +159,8 @@ def _main(args):
             act_fn = None
             if activation == 'leaky':
                 pass  # Add advanced activation later.
+            elif activation == 'mish':
+                pass
             elif activation != 'linear':
                 raise ValueError(
                     'Unknown activation function `{}` in section {}'.format(
@@ -180,6 +188,10 @@ def _main(args):
                 all_layers.append(prev_layer)
             elif activation == 'leaky':
                 act_layer = LeakyReLU(alpha=0.1)(prev_layer)
+                prev_layer = act_layer
+                all_layers.append(act_layer)
+            elif activation == 'mish':
+                act_layer = Mish()(prev_layer)
                 prev_layer = act_layer
                 all_layers.append(act_layer)
 
