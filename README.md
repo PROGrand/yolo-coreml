@@ -32,6 +32,7 @@ python convertv4.py yolov4.cfg yolov4.weights yolov4.mlmodel
 
 ## Performance
 YOLOv3-Tiny 224x224 (SCRATCH) network takes about 40 detections per second on iPhone X.
+
 YOLOv4 416x416 (COCO) network takes about 0.27 detections per second on iPhone 6.
 
 
