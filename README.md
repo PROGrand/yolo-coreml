@@ -28,10 +28,12 @@ conda install coremltools=4.1
 python convertv4.py yolov4.cfg yolov4.weights yolov4.mlmodel
 ```
 
-6. See [how to use created mlmodel](https://github.com/Mrlawrance/yolov3-ios/tree/master/ios). Change classes names and count, anchors, network size if you use your owns.
+6. You can use ios project as reference. Copy yolov4.mlmodel to project folder. Check anchors in yolov4.cfg and swift code. Change classes names and count, anchors, network size if you use your owns.
 
 ## Performance
-Tiny 224x224 network gives about 40 detections per second on iPhone X.
+YOLOv3-Tiny 224x224 (SCRATCH) network takes about 40 detections per second on iPhone X.
+YOLOv4 416x416 (COCO) network takes about 0.27 detections per second on iPhone 6.
+
 
 ## References
 * [YOLO](http://pjreddie.com/darknet/yolo)
