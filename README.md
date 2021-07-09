@@ -12,13 +12,13 @@ Also we need two virtualenvs in ubuntu - for python2 and python3.
 
 3. Create yolov3 darknet model. You can use my config and scripts from [scratch](scratch) folder for reference. 
 
-4. Instal Anaconda
+4. Install Anaconda
 ```
 wget https://repo.continuum.io/archive/Anaconda3-5.3.1-Linux-x86_64.sh
 bash ./Anaconda3-5.3.1-Linux-x86_64.sh
 ```
 
-5. yolov3 -> coreml (requires python3 and anaconda):
+5. yolo -> coreml:
 ```
 conda create -n yolo2coreml python=3.6 anaconda
 conda activate yolo2coreml
