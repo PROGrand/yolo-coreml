@@ -10,7 +10,7 @@ Also we need two virtualenvs in ubuntu - for python2 and python3.
 
 2. Prepare image dataset. My network is for detection of SCRATCHES on 224x224 input. Refer to darknet docs if you need your own objects. Split images into scratch/positives and scratch/negatives. Positives must contain images with objects and txt files with boxes. Negatives must contain images without objects and empty txt files. You can use [Yolo_mark](https://github.com/AlexeyAB/Yolo_mark).
 
-3. Create yolov3 darknet model. You can use my config and scripts from [scratch](scratch) folder for reference. 
+3. Create yolo darknet model. You can use my config and scripts from [scratch](scratch) folder for reference. 
 
 4. Install Anaconda
 ```
