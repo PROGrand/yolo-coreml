@@ -11,7 +11,7 @@ import os
 from collections import defaultdict
 
 from PIL import Image
-from yolo3.utils import letterbox_image
+from yolo.utils import letterbox_image
 
 import numpy as np
 from keras import backend as K

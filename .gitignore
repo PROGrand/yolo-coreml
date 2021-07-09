@@ -1,6 +1,7 @@
-
+__pycache__
 .DS_Store
 *.h5
+*.cfg
 *.weights
 *.mlmodel
 
