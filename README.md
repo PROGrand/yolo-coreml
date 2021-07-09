@@ -20,8 +20,8 @@ bash ./Anaconda3-5.3.1-Linux-x86_64.sh
 
 5. yolov3 -> coreml (requires python3 and anaconda):
 ```
-conda create -n yolo2keras python=3.6 anaconda
-conda activate yolo2keras
+conda create -n yolo2coreml python=3.6 anaconda
+conda activate yolo2coreml
 conda install tensorflow=1.14.0
 conda install keras=2.3.1
 conda install coremltools=4.1
