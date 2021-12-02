@@ -1,10 +1,10 @@
-# yolo-coreml for YOLOv3 and YOLOv4
+# CoreML for YOLOv3 and YOLOv4
 
 ## Quick Start
 
 I will demonstrate, how to create and use realtime object detection engine
 using [YOLO](http://pjreddie.com/darknet/yolo/) and iOS. For network creation i use Ubuntu 19.04 with NVidia GPU. For
-iOS compilation i use Catalina and Xcode 11. Also we need two virtualenvs in ubuntu - for python2 and python3.
+iOS conversion and compilation i use Monterey and Xcode 13.1.
 
 1. Get and compile darknet, i recommend [AlexeyAB fork](https://github.com/AlexeyAB/darknet.git). Enable CUDA and OpenCV
    support.
@@ -14,7 +14,7 @@ iOS compilation i use Catalina and Xcode 11. Also we need two virtualenvs in ubu
    objects and txt files with boxes. Negatives must contain images without objects and empty txt files. You can
    use [Yolo_mark](https://github.com/AlexeyAB/Yolo_mark).
 
-3. Create yolo darknet model. You can use my config and scripts from [scratch](scratch) folder for reference.
+3. Create yolo darknet model.
 
 ## YOLOv3, YOLOv4, YOLOv4-TINY
 
