@@ -1,8 +1,9 @@
 //
 //  BoundingBox.swift
-//  yolov4
+//  tiny_model
 //
-//  Copyright © 2021 Vladimir E. Koltunov. All rights reserved.
+//  Created by wanwenhao on 2018/7/25.
+//  Copyright © 2018年 wanwenhao. All rights reserved.
 //
 
 import Foundation
@@ -24,7 +25,7 @@ class BoundingBox {
         textLayer.contentsScale = UIScreen.main.scale
         textLayer.fontSize = 14
         textLayer.font = UIFont(name: "Avenir", size: textLayer.fontSize)
-        textLayer.alignmentMode = CATextLayerAlignmentMode.center
+        textLayer.alignmentMode = kCAAlignmentCenter
     }
     
     func addToLayer(_ parent: CALayer) {
@@ -45,7 +46,7 @@ class BoundingBox {
         textLayer.isHidden = false
         
         let attributes = [
-            NSAttributedString.Key.font: textLayer.font as Any
+            NSAttributedStringKey.font: textLayer.font as Any
         ]
         
         let textRect = label.boundingRect(with: CGSize(width: 400, height: 100),

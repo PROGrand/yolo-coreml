@@ -126,8 +126,15 @@ def _main(args):
     cfg_parser.read_file(unique_config_file)
 
     print('Creating Keras model.')
-    input_layer = Input(shape=(416, 416, 3))
-    prev_layer = input_layer
+    
+    net_width = int(cfg_parser['net_0']['width'])
+    net_height = int(cfg_parser['net_0']['height'])
+    net_channels = int(cfg_parser['net_0']['channels'])
+    
+    print('W:', net_width, 'H:', net_height, 'C:', net_channels)
+    
+    prev_layer = Input(shape=(net_height, net_width, net_channels))
+    input_layer = prev_layer
     all_layers = []
 
     weight_decay = float(cfg_parser['net_0']['decay']
@@ -154,6 +161,7 @@ def _main(args):
             weights_shape = (size, size, prev_layer_shape[-1], filters)
             darknet_w_shape = (filters, weights_shape[2], size, size)
             weights_size = np.product(weights_shape)
+            darknet_w_size = np.product(darknet_w_shape)
 
             print('conv2d', 'bn'
                   if batch_normalize else '  ', activation, weights_shape)
@@ -178,10 +186,12 @@ def _main(args):
                     bn_weights[2]  # running var
                 ]
 
+            print('XXX', weights_size, 'DWsize:', darknet_w_size, 'W:', weights_shape, 'DW:', darknet_w_shape, 'COUNT:', count)
             conv_weights = np.ndarray(
                 shape=darknet_w_shape,
                 dtype='float32',
                 buffer=weights_file.read(weights_size * 4))
+                
             count += weights_size
 
             # DarkNet conv_weights are serialized Caffe-style:
@@ -286,16 +296,20 @@ def _main(args):
 
     model = Model(inputs=input_layer, outputs=[all_layers[i] for i in out_index])
     model.summary()
+    
+    out_names = ['output3', 'output2', 'output1']
+    if len(out_index)==2: out_names = ['output2', 'output1']
+    if len(out_index)==1: out_names = ['output1']
 
     coreml_model = coremltools.converters.keras.convert(
         model,
-        input_names='input1', image_input_names='input1', output_names=['output3', 'output2', 'output1'], image_scale=1/255.,
+        input_names='input1', image_input_names='input1', output_names=out_names, image_scale=1/255.,
         use_float_arraytype=True,
         add_custom_layers=True,custom_conversion_functions={ "Mish": convert_mish })
     coreml_model.input_description['input1'] = 'Input image'
     coreml_model.output_description['output1'] = 'The 13x13 grid (Scale1)'
-    coreml_model.output_description['output2'] = 'The 26x26 grid (Scale2)'
-    coreml_model.output_description['output3'] = 'The 52x52 grid (Scale3)'
+    if len(out_index)>=2: coreml_model.output_description['output2'] = 'The 26x26 grid (Scale2)'
+    if len(out_index)>=3: coreml_model.output_description['output3'] = 'The 52x52 grid (Scale3)'
     coreml_model.save(output_path)
 
 if __name__ == '__main__':

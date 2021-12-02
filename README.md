@@ -1,42 +1,84 @@
 # yolo-coreml for YOLOv3 and YOLOv4
 
 ## Quick Start
-I will demonstrate, how to create and use realtime object detection engine using [YOLO](http://pjreddie.com/darknet/yolo/) and iOS.
-For network creation i use Ubuntu 19.04 with NVidia GPU.
-For iOS compilation i use Catalina and Xcode 11.
-Also we need two virtualenvs in ubuntu - for python2 and python3.
 
-1. Get and compile darknet, i recommend [AlexeyAB fork](https://github.com/AlexeyAB/darknet.git). Enable CUDA and OpenCV support.
+I will demonstrate, how to create and use realtime object detection engine
+using [YOLO](http://pjreddie.com/darknet/yolo/) and iOS. For network creation i use Ubuntu 19.04 with NVidia GPU. For
+iOS compilation i use Catalina and Xcode 11. Also we need two virtualenvs in ubuntu - for python2 and python3.
 
-2. Prepare image dataset. My network is for detection of SCRATCHES on 224x224 input. Refer to darknet docs if you need your own objects. Split images into scratch/positives and scratch/negatives. Positives must contain images with objects and txt files with boxes. Negatives must contain images without objects and empty txt files. You can use [Yolo_mark](https://github.com/AlexeyAB/Yolo_mark).
+1. Get and compile darknet, i recommend [AlexeyAB fork](https://github.com/AlexeyAB/darknet.git). Enable CUDA and OpenCV
+   support.
 
-3. Create yolo darknet model. You can use my config and scripts from [scratch](scratch) folder for reference. 
+2. Prepare image dataset. My network is for detection of SCRATCHES on 224x224 input. Refer to darknet docs if you need
+   your own objects. Split images into scratch/positives and scratch/negatives. Positives must contain images with
+   objects and txt files with boxes. Negatives must contain images without objects and empty txt files. You can
+   use [Yolo_mark](https://github.com/AlexeyAB/Yolo_mark).
 
-4. Install Anaconda
+3. Create yolo darknet model. You can use my config and scripts from [scratch](scratch) folder for reference.
+
+## YOLOv3, YOLOv4, YOLOv4-TINY
+
+Use this method for devices with iOS >= 13. Currently script generates iOS15 MLProgram mlpackage, but can be easily
+modified for iOS13 and mlmodel. YOLOv4-TINY work well. Suddenly, large YOLOv4 mlpackage takes minutes to loading on
+every iOS example app launch. At least on iPhone12 with iOS15.0.1
+
+1. Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-x86_64.pkg
+
+2. In Terminal enter conda environment (assuming anaconda installed to /anaconda3):
+
+```shell
+. /anaconda3/etc/profile.d/conda.sh
+conda create -n coremltools-env python=3.7
+conda activate coremltools-env
+pip install yolov4=3.2.0
+pip install opencv-python=4.5.4.60
+pip install h5py=1.5.2
+pip install coremltools=5.1.0
+pip install keras==2.2.4
+pip install tensorflow==2.5.0
 ```
-wget https://repo.continuum.io/archive/Anaconda3-5.3.1-Linux-x86_64.sh
-bash ./Anaconda3-5.3.1-Linux-x86_64.sh
+
+3. Prepare *.cfg file (clear unsupported learning tags if any). Example:
+
+```shell
+sh ./prepare_cfg.sh scratch/scratch.cfg scratch/scratch_t.cfg
 ```
 
-5. yolo -> coreml:
+4. Convert:
+
+```shell
+python ./convert_tiny.py -n coco.names -c yolov4-tiny_t.cfg -w yolov4-tiny.weights -m yolov4.mlpackage
+```
+
+## YOLOv3, YOLOv3-TINY, YOLOv4-Mish for iOS12
+
+Use this method for unsupported devices with iOS < 13. Also see appropriate iOS App example.
+
+1. Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-x86_64.pkg
+
+2. yolo -> coreml:
+
 ```
 conda create -n yolo2coreml python=3.6 anaconda
 conda activate yolo2coreml
 conda install tensorflow=1.14.0
 conda install keras=2.3.1
 conda install coremltools=4.1
-python convertv4.py yolov4.cfg yolov4.weights yolov4.mlmodel
+python convert_v4_old.py yolov4.cfg yolov4.weights yolov4.mlmodel
 ```
 
-6. You can use ios project as reference. Copy yolov4.mlmodel to project folder. Check anchors in yolov4.cfg and swift code. Change classes names and count, anchors, network size if you use your owns.
+3. You can use ios project as reference. Copy yolov4.mlmodel to project folder. Check anchors in yolov4.cfg and swift
+   code. Change classes names and count, anchors, network size if you use your owns.
 
 ## Performance
-YOLOv3-Tiny 224x224 (SCRATCH) network takes about 40 detections per second on iPhone X.
 
-YOLOv4 416x416 (COCO) network takes about 0.27 detections per second on iPhone 6.
-
+- YOLOv3-Tiny 224x224 (SCRATCH) network takes about 25 ms per detection on iPhone X.
+- YOLOv4 old method 416x416 (COCO) network takes about 5 second per detection on iPhone 6.
+- YOLOv4 608x608 (COCO) network takes about 10 seconds per detection on iPhone 12.
+- YOLOv4-TINY 416x416 (COCO) network takes about 19 ms per detection on iPhone 12.
 
 ## References
+
 * [YOLO](http://pjreddie.com/darknet/yolo)
 * [AlexeyAB](https://github.com/AlexeyAB/darknet.git)
 * [allanzelener](https://github.com/allanzelener/YAD2K)

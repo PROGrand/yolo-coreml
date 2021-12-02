@@ -1,15 +1,16 @@
 //
 //  VideoCapture.swift
-//  yolov4
+//  tiny_model
 //
-//  Copyright © 2021 Vladimir E. Koltunov. All rights reserved.
+//  Created by wanwenhao on 2018/7/25.
+//  Copyright © 2018年 wanwenhao. All rights reserved.
 //
 
 import UIKit
 import AVFoundation
 import CoreVideo
 
-public protocol VideoCaptureDelegate: AnyObject {
+public protocol VideoCaptureDelegate: class {
     func videoCapture(_ capture: VideoCapture, didCaptureVideoFrame: CVPixelBuffer?, timestamp: CMTime)
 }
 
@@ -96,7 +97,7 @@ extension VideoCapture: AVCaptureVideoDataOutputSampleBufferDelegate {
         // framerate.
         let timestamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
         let deltaTime = timestamp - lastTimestamp
-        if deltaTime >= CMTimeMake(value: 1, timescale: Int32(fps)) {
+        if deltaTime >= CMTimeMake(1, Int32(fps)) {
             lastTimestamp = timestamp
             let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)
             //        print("fps\(timestamp)")

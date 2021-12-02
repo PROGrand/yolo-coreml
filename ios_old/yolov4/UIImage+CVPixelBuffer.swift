@@ -1,8 +1,9 @@
 //
 //  UIImage+CVPixelBuffer.swift
-//  yolov4
+//  tiny_model
 //
-//  Copyright © 2021 Vladimir E. Koltunov. All rights reserved.
+//  Created by wanwenhao on 2018/7/25.
+//  Copyright © 2018年 wanwenhao. All rights reserved.
 //
 
 import UIKit
