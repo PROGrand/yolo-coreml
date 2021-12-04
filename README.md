@@ -81,8 +81,8 @@ python convert_v4_old.py yolov4.cfg yolov4.weights yolov4.mlmodel
 
 * [YOLO](http://pjreddie.com/darknet/yolo)
 * [AlexeyAB](https://github.com/AlexeyAB/darknet.git)
-* [allanzelener](https://github.com/allanzelener/YAD2K)
-* [muyiguangda](https://github.com/muyiguangda/tensorflow-keras-yolov3)
+* [coremltools](https://coremltools.readme.io/docs)
+* [python-yolov4](https://wiki.loliot.net/docs/lang/python/libraries/yolov4/python-yolov4-about/)
 
 ---
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
