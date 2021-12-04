@@ -22,7 +22,8 @@ Use this method for devices with iOS >= 13. Currently script generates iOS15 MLP
 modified for iOS13 and mlmodel. YOLOv4-TINY work well. Suddenly, large YOLOv4 mlpackage takes minutes to loading on
 every iOS example app launch. At least on iPhone12 with iOS15.0.1
 
-1. Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-x86_64.pkg
+1. `coremltools` is very sensitive to packages versions. This is why you need dedicated python `anaconda` environment.
+Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-x86_64.pkg.
 
 2. In Terminal enter conda environment (assuming anaconda installed to /anaconda3):
 
