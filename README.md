@@ -38,7 +38,7 @@ pip install keras==2.2.4
 pip install tensorflow==2.5.0
 ```
 
-3. Prepare *.cfg file (clear unsupported learning tags like `subdivisions` if any). Keep original `yolov4-tiny.cfg` if you plan to traing. Example:
+3. Prepare `yolov4-tiny.cfg` file (clear unsupported learning tags like `subdivisions` if any). Keep original `yolov4-tiny.cfg` for further trainings. Example:
 
 ```shell
 sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_temp.cfg 
