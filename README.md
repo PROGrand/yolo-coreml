@@ -38,16 +38,16 @@ pip install keras==2.2.4
 pip install tensorflow==2.5.0
 ```
 
-3. Prepare *.cfg file (clear unsupported learning tags if any). Example:
+3. Prepare *.cfg file (clear unsupported learning tags like `subdivisions` if any). Keep original `yolov4-tiny.cfg` if you plan to traing. Example:
 
 ```shell
-sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_t.cfg 
+sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_temp.cfg 
 ```
 
-4. Convert:
+4. Use prepared `yolov4-tiny_temp.cfg`. Convert:
 
 ```shell
-python ./convert_tiny.py -n coco.names -c yolov4-tiny_t.cfg -w yolov4-tiny.weights -m yolov4.mlpackage
+python ./convert_tiny.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlpackage
 ```
 
 ## YOLOv3, YOLOv3-TINY, YOLOv4-Mish for iOS12
