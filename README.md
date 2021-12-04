@@ -41,7 +41,7 @@ pip install tensorflow==2.5.0
 3. Prepare *.cfg file (clear unsupported learning tags if any). Example:
 
 ```shell
-sh ./prepare_cfg.sh scratch/scratch.cfg scratch/scratch_t.cfg
+sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_t.cfg 
 ```
 
 4. Convert:
