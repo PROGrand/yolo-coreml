@@ -12,6 +12,7 @@ parser.add_argument('-n', '--names_path', help='Path to names file.')
 parser.add_argument('-c', '--config_path', help='Path to Darknet cfg file.')
 parser.add_argument('-w', '--weights_path', help='Path to Darknet weights file.')
 parser.add_argument('-m', '--mlpackage_path', help='Path to output CoreML mlpackage file.')
+parser.add_argument('-l', '--layout', help='Color layout.')
 
 yolo = YOLOv4()
 
@@ -40,13 +41,13 @@ def _main(args):
 
     yolo.make_model()
     yolo.load_weights(weights_path, weights_type="yolo")
-    yolo.summary(summary_type="yolo")
+    #yolo.summary(summary_type="yolo")
     yolo.summary()
 
 
     # Convert to Core ML
     model = ct.convert(yolo.model,
-                       inputs=[ImageType(name='input_1', scale=1/255., color_layout="BGR",
+                       inputs=[ImageType(name='input_1', scale=1/255., color_layout=args.layout,
                                          channel_first=False)],
                        minimum_deployment_target=ct.target.iOS15,
                        compute_precision=ct.precision.FLOAT16,
