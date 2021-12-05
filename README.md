@@ -22,7 +22,8 @@ Use this method for devices with iOS >= 13. Currently script generates iOS15 MLP
 modified for iOS13 and mlmodel. YOLOv4-TINY work well. Suddenly, large YOLOv4 mlpackage takes minutes to loading on
 every iOS example app launch. At least on iPhone12 with iOS15.0.1
 
-1. Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-x86_64.pkg
+1. `coremltools` is very sensitive to packages versions. This is why you need dedicated python `anaconda` environment.
+Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-x86_64.pkg.
 
 2. In Terminal enter conda environment (assuming anaconda installed to /anaconda3):
 
@@ -38,16 +39,16 @@ pip install keras==2.2.4
 pip install tensorflow==2.5.0
 ```
 
-3. Prepare *.cfg file (clear unsupported learning tags if any). Example:
+3. Prepare `yolov4-tiny.cfg` file (clear unsupported learning tags like `subdivisions` if any). Keep original `yolov4-tiny.cfg` for further trainings. Example:
 
 ```shell
-sh ./prepare_cfg.sh scratch/scratch.cfg scratch/scratch_t.cfg
+sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_temp.cfg 
 ```
 
-4. Convert:
+4. Use prepared `yolov4-tiny_temp.cfg`. Convert:
 
 ```shell
-python ./convert_tiny.py -n coco.names -c yolov4-tiny_t.cfg -w yolov4-tiny.weights -m yolov4.mlpackage
+python ./convert_tiny.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlpackage
 ```
 
 ## YOLOv3, YOLOv3-TINY, YOLOv4-Mish for iOS12
@@ -81,8 +82,8 @@ python convert_v4_old.py yolov4.cfg yolov4.weights yolov4.mlmodel
 
 * [YOLO](http://pjreddie.com/darknet/yolo)
 * [AlexeyAB](https://github.com/AlexeyAB/darknet.git)
-* [allanzelener](https://github.com/allanzelener/YAD2K)
-* [muyiguangda](https://github.com/muyiguangda/tensorflow-keras-yolov3)
+* [coremltools](https://coremltools.readme.io/docs)
+* [python-yolov4](https://wiki.loliot.net/docs/lang/python/libraries/yolov4/python-yolov4-about/)
 
 ---
 [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
