@@ -48,7 +48,7 @@ sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_temp.cfg
 4. Use prepared `yolov4-tiny_temp.cfg`. Convert:
 
 ```shell
-python ./convert_v4.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlpackage
+python ./convert_v4.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlpackage -l RGB
 ```
 
 ## YOLOv3, YOLOv3-TINY, YOLOv4-Mish for iOS12
