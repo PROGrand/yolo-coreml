@@ -13,9 +13,12 @@ import VideoToolbox
 
 class ViewController: UIViewController {
 	
+	let inputWidth = 416
+	let inputHeight = 416
+	let maxBoundingBoxes = 10
 	let labelHeight:CGFloat = 50.0
 	
-	var yolo : YOLO?
+	var yolo = YOLO4Tiny()
 	
 	var videoCapture: VideoCapture!
 	var request: VNCoreMLRequest!
@@ -45,13 +48,16 @@ class ViewController: UIViewController {
 	override func viewDidLoad() {
 		super.viewDidLoad()
 		
-#if YOLO_TINY
-		yolo = try? YOLO(width: 416, height: 416, channels: 3)
-#else
-		yolo = try? YOLO(width: 608, height: 608, channels: 3)
-#endif
+		Task { [weak self] in
+			print("TASK IN")
+			try! await self?.yolo.load(width: inputWidth, height: inputHeight, confidence: 0.4, nms: 0.6, maxBoundingBoxes: maxBoundingBoxes)
+			print("TASK OUT")
+		}
+
 		timeLabel.frame = CGRect(x: 0, y: UIScreen.main.bounds.size.height - self.labelHeight, width: UIScreen.main.bounds.size.width, height: self.labelHeight)
-		videoPreview.frame = self.view.frame
+		let frm = self.view.frame
+		
+		videoPreview.frame = frm
 		
 		view.addSubview(timeLabel)
 		view.addSubview(videoPreview)
@@ -67,26 +73,24 @@ class ViewController: UIViewController {
 	
 	
 	func setUpBoundingBoxes() {
-		if (nil != yolo) {
-			for _ in 0..<yolo!.maxBoundingBoxes {
-				boundingBoxes.append(BoundingBox())
-			}
-			
-			// Make colors for the bounding boxes. There is one color for each class,
-			// 20 classes in total.
-			for r: CGFloat in [0.1,0.2, 0.3,0.4,0.5, 0.6,0.7, 0.8,0.9, 1.0] {
-				for g: CGFloat in [0.3,0.5, 0.7,0.9] {
-					for b: CGFloat in [0.4,0.6 ,0.8] {
-						let color = UIColor(red: r, green: g, blue: b, alpha: 1)
-						colors.append(color)
-					}
+		for _ in 0 ..< maxBoundingBoxes {
+			boundingBoxes.append(BoundingBox())
+		}
+		
+		// Make colors for the bounding boxes. There is one color for each class,
+		// 20 classes in total.
+		for r: CGFloat in [0.1,0.2, 0.3,0.4,0.5, 0.6,0.7, 0.8,0.9, 1.0] {
+			for g: CGFloat in [0.3,0.5, 0.7,0.9] {
+				for b: CGFloat in [0.4,0.6 ,0.8] {
+					let color = UIColor(red: r, green: g, blue: b, alpha: 1)
+					colors.append(color)
 				}
 			}
 		}
 	}
 	
 	func setUpCoreImage() {
-		let status = CVPixelBufferCreate(nil, yolo!.inputWidth, yolo!.inputHeight,
+		let status = CVPixelBufferCreate(nil, inputWidth, inputHeight,
 										 kCVPixelFormatType_32BGRA, nil,
 										 &resizedPixelBuffer)
 		if status != kCVReturnSuccess {
@@ -97,35 +101,30 @@ class ViewController: UIViewController {
 	func setUpCamera() {
 		videoCapture = VideoCapture()
 		videoCapture.delegate = self
-		videoCapture.fps = 50
-		weak var welf = self
+		videoCapture.fps = 25
 		
-		videoCapture.setUp(sessionPreset: AVCaptureSession.Preset.vga640x480) { success in
+		videoCapture.setUp(sessionPreset: AVCaptureSession.Preset.hd1280x720) { [weak self] success in
 			if success {
 				// Add the video preview into the UI.
-				if let previewLayer = welf?.videoCapture.previewLayer {
-					welf?.videoPreview.layer.addSublayer(previewLayer)
-					welf?.resizePreviewLayer()
+				if let previewLayer = self?.videoCapture.previewLayer {
+					self?.videoPreview.layer.addSublayer(previewLayer)
+					self?.resizePreviewLayer()
 				}
 				
 				
 				// Add the bounding box layers to the UI, on top of the video preview.
 				DispatchQueue.main.async {
-					guard let  boxes = welf?.boundingBoxes,let videoLayer  = welf?.videoPreview.layer else {return}
+					guard let  boxes = self?.boundingBoxes,let videoLayer  = self?.videoPreview.layer else {return}
 					for box in boxes {
 						box.addToLayer(videoLayer)
 					}
-					welf?.semaphore.signal()
+					self?.semaphore.signal()
 				}
 				
 				
 				// Once everything is set up, we can start capturing live video.
-				welf?.videoCapture.start()
-				
-				
-				//     yolo.buffer(from: image)
-				//        self.predict(pixelBuffer: self.yolo.buffer(from: image)!)
-				
+				self?.videoCapture.start()
+
 			}
 		}
 	}
@@ -152,51 +151,45 @@ class ViewController: UIViewController {
 		// Resize the input with Core Image.
 		guard let resizedPixelBuffer = resizedPixelBuffer else { return }
 		let ciImage = CIImage(cvPixelBuffer: pixelBuffer)
-		let sx = CGFloat(yolo!.inputWidth) / CGFloat(CVPixelBufferGetWidth(pixelBuffer))
-		let sy = CGFloat(yolo!.inputHeight) / CGFloat(CVPixelBufferGetHeight(pixelBuffer))
+		let sx = CGFloat(inputWidth) / CGFloat(CVPixelBufferGetWidth(pixelBuffer))
+		let sy = CGFloat(inputHeight) / CGFloat(CVPixelBufferGetHeight(pixelBuffer))
 		let scaleTransform = CGAffineTransform(scaleX: sx, y: sy)
 		let scaledImage = ciImage.transformed(by: scaleTransform)
 		ciContext.render(scaledImage, to: resizedPixelBuffer)
 		
-		// This is an alternative way to resize the image (using vImage):
-		//if let resizedPixelBuffer = resizePixelBuffer(pixelBuffer,
-		//                                              width: YOLO.inputWidth,
-		//                                              height: YOLO.inputHeight)
 		
-		if let boundingBoxes = try? yolo!.predict(image: resizedPixelBuffer) {
+		if let boundingBoxes = try? yolo.predict(image: resizedPixelBuffer) {
 			let elapsed = CACurrentMediaTime() - startTime
 			showOnMainThread(boundingBoxes, elapsed)
 		}
 	}
 	
 	
-	func showOnMainThread(_ boundingBoxes: [YOLO.Prediction], _ elapsed: CFTimeInterval) {
-		weak var welf = self
-		
-		DispatchQueue.main.async {
+	func showOnMainThread(_ boundingBoxes: [Prediction], _ elapsed: CFTimeInterval) {
+		DispatchQueue.main.async { [weak self] in
 			// For debugging, to make sure the resized CVPixelBuffer is correct.
 			//var debugImage: CGImage?
 			//VTCreateCGImageFromCVPixelBuffer(resizedPixelBuffer, nil, &debugImage)
 			//self.debugImageView.image = UIImage(cgImage: debugImage!)
 			
-			welf?.show(predictions: boundingBoxes)
+			self?.show(predictions: boundingBoxes)
 			
-			guard  let fps = welf?.measureFPS() else{return}
-			welf?.timeLabel.text = String(format: "Elapsed %.5f seconds - %.2f FPS", elapsed, fps)
+			guard  let fps = self?.measureFPS() else{return}
+			self?.timeLabel.text = String(format: "Elapsed %.5f seconds - %.2f FPS", elapsed, fps)
 			
-			welf?.semaphore.signal()
+			self?.semaphore.signal()
 		}
 	}
 	
-	func show(predictions: [YOLO.Prediction]) {
+	func show(predictions: [Prediction]) {
 		for i in 0..<boundingBoxes.count {
 			if i < predictions.count {
 				let prediction = predictions[i]
 				
 				let width = view.bounds.width
-				let height = width * 4 / 3
-				let scaleX = width / CGFloat(yolo!.inputWidth)
-				let scaleY = height / CGFloat(yolo!.inputHeight)
+				let height = width * 1280 / 720
+				let scaleX = width
+				let scaleY = height
 				let top = (view.bounds.height - height) / 2
 				
 				// Translate and scale the rectangle to our own coordinate system.
@@ -208,7 +201,7 @@ class ViewController: UIViewController {
 				rect.size.height *= scaleY
 				
 				// Show the bounding box.
-				let label = String(format: "%@ %.1f", labels[prediction.classIndex], prediction.score)
+				let label = String(format: "%@ %.1f", yolo.names[prediction.classIndex] ?? "<unknown>", prediction.score)
 				let color = colors[prediction.classIndex]
 				boundingBoxes[i].show(frame: rect, label: label, color: color)
 			} else {
@@ -241,18 +234,9 @@ class ViewController: UIViewController {
 
 extension ViewController: VideoCaptureDelegate {
 	func videoCapture(_ capture: VideoCapture, didCaptureVideoFrame pixelBuffer: CVPixelBuffer?, timestamp: CMTime) {
-		// For debugging.
-		//    predict(image: UIImage(named: "bridge00508")!); return
-		//    semaphore.wait()
-		
-		weak var welf = self
 		if let pixelBuffer = pixelBuffer {
-			// For better throughput, perform the prediction on a background queue
-			// instead of on the VideoCapture queue. We use the semaphore to block
-			// the capture queue and drop frames when Core ML can't keep up.
-			DispatchQueue.global().async {
-				welf?.predict(pixelBuffer: pixelBuffer)
-				//        self.predictUsingVision(pixelBuffer: pixelBuffer)
+			DispatchQueue.global().async { [weak self] in
+				self?.predict(pixelBuffer: pixelBuffer)
 			}
 		}
 	}

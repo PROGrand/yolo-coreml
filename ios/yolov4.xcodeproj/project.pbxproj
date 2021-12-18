@@ -7,7 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		7D756B92275970570087EF05 /* yolov4.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 7D756B91275970570087EF05 /* yolov4.mlpackage */; };
+		7DC93C27276E29CE0008EC63 /* YOLO4Tiny.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7DC93C26276E29CE0008EC63 /* YOLO4Tiny.swift */; };
+		7DC93C29276E301B0008EC63 /* yolov4-tiny.mlpackage in Sources */ = {isa = PBXBuildFile; fileRef = 7DC93C28276E301B0008EC63 /* yolov4-tiny.mlpackage */; };
 		BC3C745521085D6300F21C9E /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC3C745421085D6300F21C9E /* AppDelegate.swift */; };
 		BC3C745721085D6300F21C9E /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC3C745621085D6300F21C9E /* ViewController.swift */; };
 		BC3C745A21085D6300F21C9E /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BC3C745821085D6300F21C9E /* Main.storyboard */; };
@@ -22,7 +23,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		7D756B91275970570087EF05 /* yolov4.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; name = yolov4.mlpackage; path = ../../yolov4.mlpackage; sourceTree = "<group>"; };
+		7DC93C26276E29CE0008EC63 /* YOLO4Tiny.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = YOLO4Tiny.swift; sourceTree = "<group>"; };
+		7DC93C28276E301B0008EC63 /* yolov4-tiny.mlpackage */ = {isa = PBXFileReference; lastKnownFileType = folder.mlpackage; name = "yolov4-tiny.mlpackage"; path = "../../yolov4-tiny/yolov4-tiny.mlpackage"; sourceTree = "<group>"; };
 		BC3C745121085D6300F21C9E /* yolov4.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = yolov4.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC3C745421085D6300F21C9E /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		BC3C745621085D6300F21C9E /* ViewController.swift */ = {isa = PBXFileReference; indentWidth = 4; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; tabWidth = 4; };
@@ -71,7 +73,7 @@
 		BC3C745321085D6300F21C9E /* yolov4 */ = {
 			isa = PBXGroup;
 			children = (
-				7D756B91275970570087EF05 /* yolov4.mlpackage */,
+				7DC93C28276E301B0008EC63 /* yolov4-tiny.mlpackage */,
 				BC3C746021085D6400F21C9E /* Info.plist */,
 				BC3C745421085D6300F21C9E /* AppDelegate.swift */,
 				BC3C746621085F9800F21C9E /* BoundingBox.swift */,
@@ -84,6 +86,7 @@
 				BC3C745B21085D6400F21C9E /* Assets.xcassets */,
 				BC3C745D21085D6400F21C9E /* LaunchScreen.storyboard */,
 				BC3C745821085D6300F21C9E /* Main.storyboard */,
+				7DC93C26276E29CE0008EC63 /* YOLO4Tiny.swift */,
 			);
 			path = yolov4;
 			sourceTree = "<group>";
@@ -165,9 +168,10 @@
 				BC3C746F2108609B00F21C9E /* VideoCapture.swift in Sources */,
 				BC3C746D2108608500F21C9E /* UIImage+CVPixelBuffer.swift in Sources */,
 				BC3C745721085D6300F21C9E /* ViewController.swift in Sources */,
+				7DC93C27276E29CE0008EC63 /* YOLO4Tiny.swift in Sources */,
+				7DC93C29276E301B0008EC63 /* yolov4-tiny.mlpackage in Sources */,
 				BC3C745521085D6300F21C9E /* AppDelegate.swift in Sources */,
 				BC3C746921085FBD00F21C9E /* Helpers.swift in Sources */,
-				7D756B92275970570087EF05 /* yolov4.mlpackage in Sources */,
 				BC3C746B2108605E00F21C9E /* CVPiexlBuffer+Helpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

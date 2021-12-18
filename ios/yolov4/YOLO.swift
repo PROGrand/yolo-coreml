@@ -1,5 +1,5 @@
 //
-//  YOLO.swift
+//  YOLOWrapper.swift
 //  yolov4
 //
 //  Copyright © 2021 Vladimir E. Koltunov. All rights reserved.
@@ -9,48 +9,147 @@ import Foundation
 import UIKit
 import CoreML
 
-class YOLO {
+class YOLOWrapper {
+	
+	var yolo : YOLO?
+	
+	@objc
+	func load(width: Int, height: Int, confidence: Float, nms: Float, maxBoundingBoxes: Int) async throws {
+	}
+	
+	@objc
+	public func predict(image: CVPixelBuffer) throws -> [Prediction] {
+		return try yolo?.predict(image: image) ?? []
+	}
+	
+	var names: [Int: String] {
+		get {
+			return yolo?.names ?? [:]
+		}
+	}
+}
+
+@available(macOS 12.0, iOS 15.0, tvOS 15.0, watchOS 8.0, *)
+class imageInput : MLFeatureProvider {
+
+	var input: CVPixelBuffer
+
+	var featureNames: Set<String> {
+		get {
+			return ["input_1"]
+		}
+	}
+	
+	func featureValue(for featureName: String) -> MLFeatureValue? {
+		if (featureName == "input_1") {
+			return MLFeatureValue(pixelBuffer: input)
+		}
+		return nil
+	}
+	
+	init(_ input: CVPixelBuffer) {
+		self.input = input
+	}
+}
+
+@objc class Prediction : NSObject {
+	@objc let classIndex: Int
+	@objc let score: Float
+	@objc let rect: CGRect
+	
+	public init(classIndex: Int,
+	 score: Float,
+	 rect: CGRect) {
+		self.classIndex = classIndex
+		self.score = score
+		self.rect = rect
+	}
+}
+
+
+
+@objc
+class YOLO : NSObject {
 	public let inputWidth: Int
 	public let inputHeight: Int
 	public let shapePoint: Int
 	
-	var model : yolov4?
+	var model : MLModel?
 	
 	// Tweak these values to get more or fewer predictions.
-	public let confidenceThreshold: Float = 0.016
-	public let iouThreshold: Float = 0.1
-	public let maxBoundingBoxes: Int = 5
-	
-	struct Prediction {
-		let classIndex: Int
-		let score: Float
-		let rect: CGRect
-	}
+	public let confidenceThreshold: Float
+	public let iouThreshold: Float
+	public let maxBoundingBoxes: Int
+	public let anchors: [(Float,Float)]
+	public let names: [Int: String]
+	public let classesCount : Int
+	public let newCoords: Bool
 	
 	
-	
-	public init(width: Int, height: Int, channels: Int) throws {
+	public init(width: Int, height: Int, channels: Int, model: MLModel, confidenceThreshold: Float, nmsThreshold: Float, maxBoundingBoxes: Int, newCoords: Bool = false) throws {
+		self.confidenceThreshold = confidenceThreshold
+		self.anchors = YOLO.parseAnchors(model: model)
+		self.names = try YOLO.parseNames(model: model)
+		self.classesCount = names.count
+		self.iouThreshold = nmsThreshold
+		self.maxBoundingBoxes = maxBoundingBoxes
 		inputWidth = width
 		inputHeight = height
+		self.newCoords = newCoords
 		
 		shapePoint = inputWidth * inputHeight * channels
 		
-		weak var welf = self
-		yolov4.load(completionHandler: { result in
-			switch result {
-			case .failure(let error):
-				print(error)
-			case .success(let modelSuccess):
-				welf?.model = modelSuccess
-			}
-		})
-		
+		self.model = model
 	}
 	
+	public static func parseAnchors(model: MLModel) -> [(Float,Float)] {
+		let userDefines = model.modelDescription.metadata[MLModelMetadataKey.creatorDefinedKey] as? NSDictionary
+		let anchorsString = userDefines?["yolo.anchors"] as? String
+		
+		return YOLO.parseAnchorsString(anchorsString: anchorsString!)
+	}
+	
+	public static func parseNames(model: MLModel) throws -> [Int:String] {
+		guard let userDefines = model.modelDescription.metadata[MLModelMetadataKey.creatorDefinedKey] as? NSDictionary else { return [:]}
+		guard let anchorsString = userDefines["yolo.names"] as? String else { return [:] }
+		guard let data = anchorsString.data(using: .utf8) else { return [:] }
+		return try JSONDecoder().decode([Int:String].self, from: data)
+	}
+	
+	static func scaleAnchors(_ a: [Float], _ width: Int, _ height: Int) -> [(Float, Float)] {
+		var anchors = [(Float, Float)](repeating: (0.0, 0.0), count: a.count / 2)
+		for n in 0 ..< a.count / 2 {
+			anchors[n].0 = a[2 * n] / Float(width)
+			anchors[n].1 = a[2 * n + 1] / Float(height)
+		}
+		
+		return anchors
+	}
+	
+	static func parseAnchorsString(anchorsString: String) -> [(Float, Float)] {
+		let splitted = anchorsString.trimmingCharacters(in: ["[","]", " "]).split(separator: "\n")
+		
+		var anchors = [(Float, Float)](repeating: (0.0, 0.0), count: splitted.count)
+		for n in 0 ..< splitted.count {
+			let pair = splitted[n].description.trimmingCharacters(in: ["[", "]", ",", " "]).split(separator: ",").map { val in
+				Float(val.trimmingCharacters(in: [" "]))
+			}
+			anchors[n].0 = pair[0]!
+			anchors[n].1 = pair[1]!
+		}
+		
+		return anchors
+	}
+	
+	
+	@objc
 	public func predict(image: CVPixelBuffer) throws -> [Prediction] {
 		
 		let startTime = Date.now
-		if let output = try? model?.prediction(input_1: image) {
+		
+		let input = imageInput(image)
+		
+		if let output = try? model?.prediction(from: input) {
 			
 			print("Inference time: \(Date.now.timeIntervalSince(startTime))")
 			
@@ -72,7 +171,7 @@ class YOLO {
 		var blockSize: Int
 	}
 	
-	public func computeBoundingBoxes(features: yolov4Output) -> [Prediction] {
+	public func computeBoundingBoxes(features: MLFeatureProvider) -> [Prediction] {
 		
 		var predictions = [Prediction]()
 		
@@ -84,21 +183,21 @@ class YOLO {
 			}.sorted { $0.rows > $1.rows}
 		
 		
-		let numClasses = labels.count
-		
 		var index = 0
+		let anchorStride = anchors.count / outputFeatures.count
+		
 		for output in outputFeatures {
-			predictions.append(contentsOf:self.computeBoundingBoxes(output: output,	numClasses: numClasses, anchors: anchors[index]) )
+			let _anchors = Array<(Float, Float)>(anchors[index * anchorStride ..< (index+1) * anchorStride])
+			predictions.append(contentsOf:self.computeBoundingBoxes(output: output,	anchors: _anchors) )
 			index += 1
 		}
 		
 		return nonMaxSuppression(boxes: predictions, limit: maxBoundingBoxes, threshold: iouThreshold)
 	}
 	
-	public func computeBoundingBoxes(output: Output, numClasses:Int, anchors: [Float]) -> [Prediction] {
-		let boxesPerCell = output.blockSize / (numClasses + 5)
-		let cellHeight = inputHeight / output.rows
-		let cellWidth = inputWidth / output.cols
+	func computeBoundingBoxes(output: Output, anchors: [(Float, Float)]) -> [Prediction] {
+		
+		let boxesPerCell = output.blockSize / (classesCount + 5)
 		
 		let cnt = output.array.count
 		let cnt_req = output.blockSize * output.rows * output.cols
@@ -120,55 +219,74 @@ class YOLO {
 		
 		var confidenceMax = Float(0)
 		
-		for cy in 0 ..< output.rows {
-			for cx in 0 ..< output.cols {
+		for y in 0 ..< output.rows {
+			for x in 0 ..< output.cols {
 				for b in 0 ..< boxesPerCell {
-					let channel = b * (numClasses + 5)
+					let channel = b * (classesCount + 5)
 					
 					// The fast way:
-					let tx = Float(featurePointer[offset(channel    , cx, cy)])
-					let ty = Float(featurePointer[offset(channel + 1, cx, cy)])
-					let tw = Float(featurePointer[offset(channel + 2, cx, cy)])
-					let th = Float(featurePointer[offset(channel + 3, cx, cy)])
-					let tc = Float(featurePointer[offset(channel + 4, cx, cy)])
+					var bbox_0 = Float(featurePointer[offset(channel    , x, y)])
+					var bbox_1 = Float(featurePointer[offset(channel + 1, x, y)])
+					var bbox_2 = Float(featurePointer[offset(channel + 2, x, y)])
+					var bbox_3 = Float(featurePointer[offset(channel + 3, x, y)])
+					let obj = Float(featurePointer[offset(channel + 4, x, y)])
+		  
+					var exist = false
+					var classes = [Float](repeating: 0, count: classesCount)
 					
-					let x = (Float(cx) + sigmoid(tx)) * Float(cellHeight)
-					let y = (Float(cy) + sigmoid(ty)) * Float(cellWidth)
-					
-					let w = exp(tw) * anchors[2 * b    ]
-					let h = exp(th) * anchors[2 * b + 1]
-					
-					let confidence = sigmoid(tc)
-					
-					var classes = [Float](repeating: 0, count: numClasses)
-					
-					
-					for c in 0 ..< numClasses {
-						classes[c] = Float(featurePointer[offset(channel + 5 + c, cx, cy)])
+					if (obj > confidenceThreshold) {
+						
+						for c in 0 ..< classesCount {
+							let bbox_c = Float(featurePointer[offset(channel + 5 + c, x, y)])
+						   
+							let prob = bbox_c * obj
+							if (prob > confidenceThreshold) {
+								classes[c] = prob;
+								exist   = true
+							} else {
+								classes[c] = 0
+							}
+						}
+
 					}
 					
-					classes = softmax(classes)
-					
 					let (detectedClass, bestClassScore) = classes.argmax()
-					
-					let confidenceInClass = bestClassScore * confidence
+										
+					let confidenceInClass = bestClassScore * obj
 					
 					confidenceMax = max(confidenceMax, confidenceInClass)
 					
-					if confidenceInClass > confidenceThreshold {
-						let rect = CGRect(x: CGFloat(x - w/2), y: CGFloat(y - h/2),
-										  width: CGFloat(w), height: CGFloat(h))
+					if (exist) {
+						bbox_0 = (bbox_0 + Float(x)) / Float(output.cols)
+						bbox_1 = (bbox_1 + Float(y)) / Float(output.rows)
+						let a = anchors[b]
 						
+						if (newCoords) {
+							bbox_2 = bbox_2 * bbox_2 * 4 * a.0
+							bbox_3 = bbox_3 * bbox_3 * 4 * a.1
+						} else {
+							
+							bbox_2 = exp(bbox_2) * a.0
+							bbox_3 = exp(bbox_3) * a.1
+						}
+						
+						
+						let rect = CGRect(x: CGFloat(bbox_0 - bbox_2/2.0), y: CGFloat(bbox_1 - bbox_3/2.0),
+										  width: CGFloat(bbox_2), height: CGFloat(bbox_3))
+
 						let prediction = Prediction(classIndex: detectedClass,
 													score: confidenceInClass,
 													rect: rect)
 						predictions.append(prediction)
 					}
+					
+					
+
 				}
 			}
 		}
 		
-		//print("predictions [\(output.rows) x \(output.cols)]: max conf: \(confidenceMax)")
+		print("predictions [\(output.rows) x \(output.cols)]: max conf: \(confidenceMax), threshold: \(confidenceThreshold)")
 		
 		// We already filtered out any bounding boxes that have very low scores,
 		// but there still may be boxes that overlap too much with others. We'll
@@ -176,5 +294,50 @@ class YOLO {
 		return nonMaxSuppression(boxes: predictions, limit: maxBoundingBoxes, threshold: iouThreshold)
 	}
 	
+	/**
+	 Removes bounding boxes that overlap too much with other boxes that have
+	 a higher score.
+	 
+	 Based on code from https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/kernels/non_max_suppression_op.cc
+	 
+	 - Parameters:
+	 - boxes: an array of bounding boxes and their scores
+	 - limit: the maximum number of boxes that will be selected
+	 - threshold: used to decide whether boxes overlap too much
+	 */
+	func nonMaxSuppression(boxes: [Prediction], limit: Int, threshold: Float) -> [Prediction] {
+		
+		// Do an argsort on the confidence scores, from high to low.
+		let sortedIndices = boxes.indices.sorted { boxes[$0].score > boxes[$1].score }
+		
+		var selected: [Prediction] = []
+		var active = [Bool](repeating: true, count: boxes.count)
+		var numActive = active.count
+		
+		// The algorithm is simple: Start with the box that has the highest score.
+		// Remove any remaining boxes that overlap it more than the given threshold
+		// amount. If there are any boxes left (i.e. these did not overlap with any
+		// previous boxes), then repeat this procedure, until no more boxes remain
+		// or the limit has been reached.
+		outer: for i in 0..<boxes.count {
+			if active[i] {
+				let boxA = boxes[sortedIndices[i]]
+				selected.append(boxA)
+				if selected.count >= limit { break }
+				
+				for j in i+1..<boxes.count {
+					if active[j] {
+						let boxB = boxes[sortedIndices[j]]
+						if IOU(a: boxA.rect, b: boxB.rect) > threshold {
+							active[j] = false
+							numActive -= 1
+							if numActive <= 0 { break outer }
+						}
+					}
+				}
+			}
+		}
+		return selected
+	}
 }
 

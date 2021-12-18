@@ -10,68 +10,6 @@ import UIKit
 import CoreML
 import Accelerate
 
-// The labels for the 80 classes.
-
-let labels = ["person","bike","car","motorbike","aeroplane","bus","train","truck","boat","traffic light","fire hydrant","stop sign","parking meter","bench","bird","cat","dog","horse","sheep","cow","elephant","bear","zebra","giraffe","backpack","umbrella","handbag","tie","suitcase","frisbee","skis","snowboard","sports ball","kite","baseball bat","baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass", "cup","fork","knife","spoon","bowl","banana","apple","sandwich","orange","broccoli","carrot","hot dog","pizza","donut","cake","chair","sofa","pottedplant","bed","diningtable","toilet","tvmonitor","laptop","mouse","remote","keyboard","cell phone","microwave","oven","toaster","sink","refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"]
-
-// for tiny model
-
-//let anchors1: [Float] = [81,82 , 135,169,  344,319]
-//let anchors2: [Float] = [10,14,  23,27,  34,58]
-
-// for yolov4 model
-
-#if YOLO_TINY
-let anchors: [[Float]] = [[10, 14, 23, 27, 37, 58], [81, 82, 135, 169, 344, 319]]
-#else
-let anchors: [[Float]] = [[12, 16, 19, 36, 40, 28], [36, 75, 76, 55, 72, 146], [142, 110, 192, 243, 459, 401]]
-#endif
-/**
- Removes bounding boxes that overlap too much with other boxes that have
- a higher score.
- 
- Based on code from https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/kernels/non_max_suppression_op.cc
- 
- - Parameters:
- - boxes: an array of bounding boxes and their scores
- - limit: the maximum number of boxes that will be selected
- - threshold: used to decide whether boxes overlap too much
- */
-func nonMaxSuppression(boxes: [YOLO.Prediction], limit: Int, threshold: Float) -> [YOLO.Prediction] {
-	
-	// Do an argsort on the confidence scores, from high to low.
-	let sortedIndices = boxes.indices.sorted { boxes[$0].score > boxes[$1].score }
-	
-	var selected: [YOLO.Prediction] = []
-	var active = [Bool](repeating: true, count: boxes.count)
-	var numActive = active.count
-	
-	// The algorithm is simple: Start with the box that has the highest score.
-	// Remove any remaining boxes that overlap it more than the given threshold
-	// amount. If there are any boxes left (i.e. these did not overlap with any
-	// previous boxes), then repeat this procedure, until no more boxes remain
-	// or the limit has been reached.
-outer: for i in 0 ..< boxes.count {
-	if active[i] {
-		let boxA = boxes[sortedIndices[i]]
-		selected.append(boxA)
-		if selected.count >= limit { break }
-		
-		for j in i + 1 ..< boxes.count {
-			if active[j] {
-				let boxB = boxes[sortedIndices[j]]
-				if IOU(a: boxA.rect, b: boxB.rect) > threshold {
-					active[j] = false
-					numActive -= 1
-					if numActive <= 0 { break outer }
-				}
-			}
-		}
-	}
-}
-	return selected
-}
-
 /**
  Computes intersection-over-union overlap between two bounding boxes.
  */
