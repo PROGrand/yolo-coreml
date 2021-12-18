@@ -31,10 +31,10 @@ Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-
 . /anaconda3/etc/profile.d/conda.sh
 conda create -n coremltools-env python=3.7
 conda activate coremltools-env
-pip install yolov4=3.2.0
-pip install opencv-python=4.5.4.60
-pip install h5py=1.5.2
-pip install coremltools=5.1.0
+pip install yolov4==3.2.0
+pip install opencv-python==4.5.4.60
+pip install h5py==1.5.2
+pip install coremltools==5.1.0
 pip install keras==2.2.4
 pip install tensorflow==2.5.0
 ```
@@ -48,7 +48,7 @@ sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_temp.cfg
 4. Use prepared `yolov4-tiny_temp.cfg`. Convert:
 
 ```shell
-python ./convert_tiny.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlpackage
+python ./convert_v4.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlpackage -l RGB
 ```
 
 ## YOLOv3, YOLOv3-TINY, YOLOv4-Mish for iOS12
