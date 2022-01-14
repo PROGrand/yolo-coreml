@@ -21,4 +21,6 @@ sed 's/subdivisions.*//
   s/random.*//
   s/resize.*//
   s/max_delta.*//
+  
+  s/stopbackward.*//
   ' $1 > $2

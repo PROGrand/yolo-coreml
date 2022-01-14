@@ -8,12 +8,26 @@
 
 import Foundation
 import CoreML
+//
+//class YOLO4Tiny : YOLOWrapper {
+//
+//	override func load(width: Int, height: Int, confidence: Float, nms: Float, maxBoundingBoxes: Int) async throws {
+//		let model = try await yolov4_tiny.load(contentsOf: Bundle.main.url(forResource: "yolov4-tiny", withExtension: "mlmodelc")!).model
+//		try yolo = YOLO(width: width, height: height,
+//				channels: 3, model: model, confidenceThreshold: confidence, nmsThreshold: nms, maxBoundingBoxes: maxBoundingBoxes)
+//	}
+//}
 
-class YOLO4Tiny : YOLOWrapper {
+
+class YOLO4My : YOLOWrapper {
 
 	override func load(width: Int, height: Int, confidence: Float, nms: Float, maxBoundingBoxes: Int) async throws {
-		let model = try await yolov4_tiny.load(contentsOf: Bundle.main.url(forResource: "yolov4-tiny", withExtension: "mlmodelc")!).model
+		print("YOLO load")
+		
+		let model = try await my.load(contentsOf: Bundle.main.url(forResource: "my", withExtension: "mlmodelc")!).model
+		
 		try yolo = YOLO(width: width, height: height,
 				channels: 3, model: model, confidenceThreshold: confidence, nmsThreshold: nms, maxBoundingBoxes: maxBoundingBoxes)
+		print("YOLO loaded")
 	}
 }

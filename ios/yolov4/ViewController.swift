@@ -13,12 +13,13 @@ import VideoToolbox
 
 class ViewController: UIViewController {
 	
-	let inputWidth = 416
-	let inputHeight = 416
+	let inputWidth = 960
+	let inputHeight = 960
 	let maxBoundingBoxes = 10
 	let labelHeight:CGFloat = 50.0
 	
-	var yolo = YOLO4Tiny()
+	//var yolo = YOLO4Tiny()
+	var yolo = YOLO4My()
 	
 	var videoCapture: VideoCapture!
 	var request: VNCoreMLRequest!
