@@ -45,11 +45,19 @@ pip install tensorflow==2.5.0
 sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_temp.cfg 
 ```
 
-4. Use prepared `yolov4-tiny_temp.cfg`. Convert:
+4. Use prepared `yolov4-tiny_temp.cfg`. Convert to iOS 15 MIL program target:
 
 ```shell
 python ./convert_v4.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlpackage -l RGB
 ```
+
+For large models not fitting iOS CoreML memory restrictions use iOS 14 neuralnetwork target:
+
+```shell
+python ./convert_v4_network.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlmodel -l RGB
+```
+
+5. Now I integrate anchors and names as spec for both mlpackage and mlmodel, so app code correctly loads such infromation from compiled model. Also different amount of yolo levels now authomatically detected and supported.
 
 ## YOLOv3, YOLOv3-TINY, YOLOv4-Mish for iOS12
 
