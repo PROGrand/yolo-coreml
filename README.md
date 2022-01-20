@@ -25,6 +25,8 @@ every iOS example app launch. At least on iPhone12 with iOS15.0.1
 1. `coremltools` is very sensitive to packages versions. This is why you need dedicated python `anaconda` environment.
 Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-x86_64.pkg.
 
+(@junmcenroe reported good results with miniconda3-py37_4.10.3-MacOSX-x86_64.pkg on MacOS 10.15)
+
 2. In Terminal enter conda environment (assuming anaconda installed to /anaconda3):
 
 ```shell
@@ -38,6 +40,8 @@ pip install coremltools==5.1.0
 pip install keras==2.2.4
 pip install tensorflow==2.5.0
 ```
+PS: h5py==3.1.0 seems to be ok.
+
 
 3. Prepare `yolov4-tiny.cfg` file (clear unsupported learning tags like `subdivisions` if any). Keep original `yolov4-tiny.cfg` for further trainings. Example:
 
