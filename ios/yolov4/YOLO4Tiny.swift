@@ -24,6 +24,8 @@ class YOLO4My : YOLOWrapper {
 	override func load(width: Int, height: Int, confidence: Float, nms: Float, maxBoundingBoxes: Int) async throws {
 		print("YOLO load")
 		
+		yolo = nil
+		
 		let model = try await my.load(contentsOf: Bundle.main.url(forResource: "my", withExtension: "mlmodelc")!).model
 		
 		try yolo = YOLO(width: width, height: height,
