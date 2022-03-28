@@ -1,6 +1,7 @@
 #!/bin/sh
 
 sed 's/subdivisions.*//
+  s/blur.*//
   s/decay.*//
   s/angle.*//
   s/saturation.*//

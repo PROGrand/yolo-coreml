@@ -25,6 +25,8 @@ every iOS example app launch. At least on iPhone12 with iOS15.0.1
 1. `coremltools` is very sensitive to packages versions. This is why you need dedicated python `anaconda` environment.
 Install Anaconda from: https://repo.anaconda.com/archive/Anaconda3-5.3.1-MacOSX-x86_64.pkg.
 
+(@junmcenroe reported good results with miniconda3-py37_4.10.3-MacOSX-x86_64.pkg on MacOS 10.15)
+
 2. In Terminal enter conda environment (assuming anaconda installed to /anaconda3):
 
 ```shell
@@ -38,6 +40,8 @@ pip install coremltools==5.1.0
 pip install keras==2.2.4
 pip install tensorflow==2.5.0
 ```
+PS: h5py==3.1.0 seems to be ok.
+
 
 3. Prepare `yolov4-tiny.cfg` file (clear unsupported learning tags like `subdivisions` if any). Keep original `yolov4-tiny.cfg` for further trainings. Example:
 
@@ -45,11 +49,19 @@ pip install tensorflow==2.5.0
 sh ./prepare_cfg.sh yolov4-tiny.cfg yolov4-tiny_temp.cfg 
 ```
 
-4. Use prepared `yolov4-tiny_temp.cfg`. Convert:
+4. Use prepared `yolov4-tiny_temp.cfg`. Convert to iOS 15 MIL program target:
 
 ```shell
 python ./convert_v4.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlpackage -l RGB
 ```
+
+For large models not fitting iOS CoreML memory restrictions use iOS 14 neuralnetwork target:
+
+```shell
+python ./convert_v4_network.py -n coco.names -c yolov4-tiny_temp.cfg -w yolov4-tiny.weights -m yolov4.mlmodel -l RGB
+```
+
+5. Now I integrate anchors and names as spec for both mlpackage and mlmodel, so app code correctly loads such infromation from compiled model. Also different amount of yolo levels now authomatically detected and supported.
 
 ## YOLOv3, YOLOv3-TINY, YOLOv4-Mish for iOS12
 

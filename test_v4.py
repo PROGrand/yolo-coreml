@@ -21,6 +21,19 @@ def predict(frame: np.ndarray, prob_thresh: float, gray: bool):
     height, width, _ = frame.shape
 
     image_data = yolo.resize_image(frame)
+    
+    if gray:
+        color_convert = cv2.COLOR_BGR2GRAY
+    else:
+        color_convert = cv2.COLOR_BGR2RGB
+
+    image_data = cv2.cvtColor(image_data, color_convert)
+
+    if gray:
+        height, width = image_data.shape
+        image_data = image_data.reshape([height, width, 1])
+
+    
     image_data = image_data / 255.0
 
     if gray:
@@ -41,7 +54,7 @@ def predict(frame: np.ndarray, prob_thresh: float, gray: bool):
 
 def inference(
         media_path,
-        prob_thresh: float = 0.25,
+        prob_thresh: float = 0.12,
         gray: bool = False
 ):
     if isinstance(media_path, str) and not path.exists(media_path):
@@ -49,24 +62,13 @@ def inference(
 
     cv2.namedWindow("result", cv2.WINDOW_AUTOSIZE)
 
-    if gray:
-        color_convert = cv2.COLOR_BGR2GRAY
-    else:
-        color_convert = cv2.COLOR_BGR2RGB
-
     frame = cv2.imread(media_path)
-    frame = cv2.cvtColor(frame, color_convert)
-
-    if gray:
-        height, width = frame.shape
-        frame = frame.reshape([height, width, 1])
 
     start_time = time.time()
     bboxes = predict(frame, prob_thresh=prob_thresh, gray=gray)
     exec_time = time.time() - start_time
     print("time: {:.2f} ms".format(exec_time * 1000))
 
-    frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
     image = yolo.draw_bboxes(frame, bboxes)
     cv2.imshow("result", image)
     print("YOLOv4: Inference is finished")
